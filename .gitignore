@@ -1,0 +1,17 @@
+# Dependencies / local
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+.vercel/
+.netlify/
+
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+
+# Editor
+.idea/
+.vscode/
+*.swp

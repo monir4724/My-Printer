@@ -1,0 +1,127 @@
+/* My Printer — Print-only styles */
+
+@media print {
+  /* Hide UI chrome */
+  nav,
+  .navbar,
+  #export-btn,
+  .export-actions,
+  .btn-logout,
+  .no-print,
+  .error-banner {
+    display: none !important;
+  }
+
+  /* Page setup */
+  @page {
+    margin: 2cm;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 12pt;
+    line-height: 1.5;
+  }
+
+  .report-main {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .report-card {
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+  }
+
+  .report-header {
+    border-bottom: 1pt solid #000;
+    margin-bottom: 18pt;
+    padding-bottom: 10pt;
+  }
+
+  .report-header h1 {
+    font-size: 16pt;
+    font-weight: 600;
+    page-break-after: avoid;
+  }
+
+  .report-meta {
+    font-size: 11pt;
+    color: #000;
+  }
+
+  h1,
+  h2 {
+    page-break-after: avoid;
+    color: #000 !important;
+  }
+
+  .section {
+    page-break-inside: avoid;
+    margin-bottom: 16pt;
+  }
+
+  .section h2 {
+    font-size: 13pt;
+  }
+
+  /* Table — keep intact across pages */
+  .detail-table {
+    width: 100%;
+    page-break-inside: avoid;
+    border-collapse: collapse;
+  }
+
+  .detail-table th,
+  .detail-table td {
+    border-bottom: 0.5pt solid #ccc;
+    padding: 6pt 8pt;
+    color: #000 !important;
+    background: transparent !important;
+  }
+
+  .detail-table th {
+    font-size: 11pt;
+    width: 130pt;
+  }
+
+  .detail-table td {
+    font-size: 11pt;
+  }
+
+  /* Status badge — text remains readable in B&W */
+  .status-badge {
+    background: transparent !important;
+    color: #000 !important;
+    border: 1pt solid #000;
+    padding: 2pt 6pt;
+    border-radius: 0;
+    font-size: 11pt;
+  }
+
+  .notes-body {
+    background: transparent !important;
+    border: 1pt solid #ccc;
+    padding: 8pt;
+    font-size: 11pt;
+    color: #000 !important;
+    page-break-inside: avoid;
+  }
+
+  /* Print footer — visible only in print */
+  #print-footer {
+    display: block !important;
+    margin-top: 28pt;
+    padding-top: 10pt;
+    border-top: 0.5pt solid #999;
+    font-size: 11pt;
+    font-weight: 400;
+    line-height: 1.4;
+    color: #000;
+  }
+}

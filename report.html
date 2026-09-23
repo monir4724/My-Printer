@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Application Summary — My Printer</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/print.css" />
+</head>
+<body>
+  <nav class="navbar no-print" aria-label="Main">
+    <a class="navbar-brand" href="list.html">My Printer</a>
+    <div class="navbar-actions">
+      <a class="nav-link" href="list.html">All applications</a>
+      <button type="button" class="btn-logout" id="logout-btn">Logout</button>
+    </div>
+  </nav>
+
+  <main class="report-main">
+    <div
+      class="error-banner no-print"
+      id="report-error"
+      hidden
+      role="alert"
+    >
+      <span class="error-banner-icon" aria-hidden="true">!</span>
+      <span class="error-banner-text" id="report-error-msg">Could not load application data.</span>
+    </div>
+
+    <p class="loading-text" id="report-loading">Loading application…</p>
+
+    <div class="report-card" id="report-content" hidden>
+      <header class="report-header">
+        <h1>Application Summary Report</h1>
+        <p class="report-meta">
+          <span class="app-id" id="app-id">—</span>
+          · Generated: <span id="generated-date">—</span>
+        </p>
+      </header>
+
+      <section class="section">
+        <h2>Applicant Details</h2>
+        <table class="detail-table">
+          <tbody>
+            <tr>
+              <th scope="row">Name</th>
+              <td id="field-name">—</td>
+            </tr>
+            <tr>
+              <th scope="row">Email</th>
+              <td id="field-email">—</td>
+            </tr>
+            <tr>
+              <th scope="row">Position</th>
+              <td id="field-position">—</td>
+            </tr>
+            <tr>
+              <th scope="row">Department</th>
+              <td id="field-department">—</td>
+            </tr>
+            <tr>
+              <th scope="row">Applied</th>
+              <td id="field-date">—</td>
+            </tr>
+            <tr>
+              <th scope="row">Status</th>
+              <td>
+                <span class="status-badge status-badge--review" id="field-status">—</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="section">
+        <h2>Review Notes</h2>
+        <div class="notes-body" id="field-notes">—</div>
+      </section>
+
+      <div class="export-actions no-print">
+        <div
+          class="error-banner export-error"
+          id="export-error"
+          hidden
+          role="alert"
+        >
+          <span class="error-banner-icon" aria-hidden="true">!</span>
+          <span class="error-banner-text"></span>
+        </div>
+
+        <button type="button" class="btn btn-primary btn-export" id="export-btn">
+          Export &amp; Save
+        </button>
+      </div>
+
+      <footer id="print-footer" aria-hidden="true"></footer>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js?v=3"></script>
+  <script src="js/auth.js?v=3"></script>
+  <script src="js/report.js?v=4"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', initReportPage);
+  </script>
+</body>
+</html>
