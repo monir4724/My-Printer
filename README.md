@@ -4,6 +4,8 @@ Staff-facing web app for viewing a job application summary and exporting it as a
 
 **Challenge:** Email-friendly HTML Report Exporter
 
+**Repo:** https://github.com/monir4724/My-Printer
+
 ---
 
 ## Live URL
@@ -42,7 +44,7 @@ See the `deliverables/` folder for:
 my-printer/
 ├── index.html          # Login page
 ├── list.html           # All applications (after login)
-├── report.html         # Report + export (?id=APP-...)
+├── report.html         # Report + export (?id=...)
 ├── css/
 │   ├── style.css       # Screen styles
 │   └── print.css       # Print-only styles
@@ -53,6 +55,7 @@ my-printer/
 │   └── report.js       # Load application + export
 ├── schema.sql          # Tables + RLS + seed
 ├── backend-tests.sql   # RLS / FK verification scripts
+├── deliverables/       # Submission assets + checklists
 └── README.md
 ```
 
@@ -71,15 +74,6 @@ No custom server — the frontend talks to Supabase with the **anon** key. Acces
 | `applications` | Flat fields (name, email, position, dept, date, status, notes) |
 | `export_snapshots` | Audit on export (`exported_by`, `exporter_email`, `snapshot_data`, `exported_at`) |
 
-### Allowed client calls
-
-| Action | Call |
-|--------|------|
-| Sign in | `auth.signInWithPassword` |
-| Session | `auth.getSession` / `onAuthStateChange` / `signOut` |
-| Fetch app | `from('applications').select('*').eq('id', APP_ID).single()` |
-| Save snapshot | `from('export_snapshots').insert({ exported_by, exporter_email, application_id, snapshot_data })` |
-
 ---
 
 ## Setup Guide
@@ -94,69 +88,37 @@ No custom server — the frontend talks to Supabase with the **anon** key. Acces
 
 1. Open **SQL Editor** and run the entire contents of `schema.sql`.
 2. Confirm `applications` and `export_snapshots` exist with RLS enabled.
-3. Confirm seed row `APP-2026-001` is present.
 
 ### 3. Auth setup
 
-1. Authentication → Providers → **Email** enabled; disable unused providers.
-2. Turn **OFF** “Confirm email” (MVP: admin-created staff accounts only).
-3. Authentication → Users → **Add user** (e.g. `hr@example.com`).
-4. No public signup page in MVP.
+1. Authentication → Providers → **Email** enabled.
+2. Turn **OFF** “Confirm email”.
+3. Authentication → Users → **Add user**.
 
-### 4. Verify backend (before relying on UI)
+### 4. Credentials
 
-In SQL Editor, run checks from `backend-tests.sql` (anon → 0 rows; FK / spoof insert must fail). Also confirm export from the app creates a row owned by your user.
+`js/supabase.js` already has project URL + anon key for this deployment. Never put `service_role` in the repo.
 
-### 5. Add your Supabase credentials
-
-Open `js/supabase.js` and replace the placeholders:
-
-```js
-const SUPABASE_URL = 'YOUR_PROJECT_URL';
-const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
-```
-
-> Never put the `service_role` key in frontend code, README, or git.
-
-### 6. Run locally
-
-Serve the folder with any static server, for example:
+### 5. Run locally
 
 ```bash
 npx serve .
 ```
 
-Then open the printed URL (e.g. `http://localhost:3000`) and log in with your test user.
+Open `http://localhost:3000` and sign in with your staff user.
 
-### 7. Deploy
+### 6. Deploy
 
-Deploy the folder to Vercel, Netlify, or GitHub Pages. Update the Live URL section above.
+Deploy to Vercel, Netlify, or GitHub Pages. Update the Live URL section above.
 
 ---
 
 ## How to Use
 
-1. Open the app → login page
-2. Sign in with your staff email + password
-3. **Applications list** shows every row from Supabase (including CSV imports)
-4. Click **View / Export** on any row
-5. Click **Export & Save**
-6. Snapshot is written to `export_snapshots`, then the browser print dialog opens
-7. Choose **Save as PDF**
-
----
-
-## Pre-Launch Checklist
-
-- [ ] Supabase project created
-- [ ] `SUPABASE_URL` and `SUPABASE_ANON_KEY` set in `js/supabase.js`
-- [ ] Tables + RLS + seed data applied via `schema.sql`
-- [ ] Email confirmation disabled
-- [ ] Test user created and can log in
-- [ ] Export creates a row in `export_snapshots`
-- [ ] Navbar / Export button hidden in print preview
-- [ ] “Exported by” footer visible in print
-- [ ] Live URL working
+1. Sign in
+2. Applications list loads from Supabase
+3. **View / Export** on any row
+4. **Export & Save** → snapshot insert → print dialog → Save as PDF
 
 ---
 
