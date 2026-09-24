@@ -5,6 +5,8 @@
  * CDN global is `supabase` (SDK). App client is `supabaseClient`.
  */
 
+const APP_VERSION = '1.0.0';
+
 const SUPABASE_URL = 'https://xbuvmomyojgpduvkmgyx.supabase.co';
 const SUPABASE_ANON_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhidXZtb215b2pncGR1dmttZ3l4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxNzU3NDcsImV4cCI6MjEwNTc1MTc0N30.T2olpO0kNoCCq131kWKSmxECMa0kx2GuhG6Hpbkq-eM';
