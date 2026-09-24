@@ -17,12 +17,7 @@
   </nav>
 
   <main class="report-main">
-    <div
-      class="error-banner no-print"
-      id="report-error"
-      hidden
-      role="alert"
-    >
+    <div class="error-banner no-print" id="report-error" hidden role="alert">
       <span class="error-banner-icon" aria-hidden="true">!</span>
       <span class="error-banner-text" id="report-error-msg">Could not load application data.</span>
     </div>
@@ -78,16 +73,10 @@
       </section>
 
       <div class="export-actions no-print">
-        <div
-          class="error-banner export-error"
-          id="export-error"
-          hidden
-          role="alert"
-        >
+        <div class="error-banner export-error" id="export-error" hidden role="alert">
           <span class="error-banner-icon" aria-hidden="true">!</span>
           <span class="error-banner-text"></span>
         </div>
-
         <button type="button" class="btn btn-primary btn-export" id="export-btn">
           Export &amp; Save
         </button>
@@ -98,9 +87,10 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase.js?v=3"></script>
-  <script src="js/auth.js?v=3"></script>
-  <script src="js/report.js?v=4"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/report.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', initReportPage);
   </script>

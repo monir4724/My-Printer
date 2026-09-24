@@ -18,6 +18,10 @@
   --color-green-text: #065F46;
   --color-red-bg: #FEE2E2;
   --color-red-text: #991B1B;
+  --color-blue-bg: #DBEAFE;
+  --color-blue-text: #1E40AF;
+  --color-slate-bg: #F3F4F6;
+  --color-slate-text: #374151;
 
   /* Text */
   --color-text-primary: #111827;
@@ -522,6 +526,16 @@ body {
 .status-badge--review {
   background: var(--color-amber-bg);
   color: var(--color-amber-text);
+}
+
+.status-badge--interview {
+  background: var(--color-blue-bg);
+  color: var(--color-blue-text);
+}
+
+.status-badge--applied {
+  background: var(--color-slate-bg);
+  color: var(--color-slate-text);
 }
 
 .status-badge--approved {

@@ -1,15 +1,9 @@
--- ============================================================
--- My Printer — Database Schema + Seed (PRD v1.2.0)
--- Run this ENTIRE file once in Supabase → SQL Editor → Run
--- ============================================================
+-- My Printer — schema + seed
+-- Run once in Supabase SQL Editor
 
--- Rebuild-safe (dependency order)
 drop table if exists export_snapshots;
 drop table if exists applications;
 
--- ========================================
--- Table: applications
--- ========================================
 create table applications (
   id               text primary key,
   applicant_name   text not null,
@@ -28,9 +22,6 @@ create policy "Authenticated users can read applications"
   to authenticated
   using (true);
 
--- ========================================
--- Table: export_snapshots
--- ========================================
 create table export_snapshots (
   id               uuid primary key default gen_random_uuid(),
   exported_at      timestamptz default now(),
@@ -52,11 +43,8 @@ create policy "Users can view own snapshots"
   to authenticated
   using (exported_by = auth.uid());
 
--- ========================================
--- Seed Data
--- ========================================
 insert into applications values (
-  'APP-2026-001',
+  '1',
   'Rafiqul Islam',
   'rafiq@example.com',
   'Software Engineer',

@@ -1,19 +1,13 @@
 /**
- * My Printer — Auth layer
- * Owns: login, logout, session checks, auth state listener.
+ * Auth: login, logout, session guard, auth state listener.
  */
 
 async function signIn(email, password) {
   if (!navigator.onLine) {
     return { success: false, error: 'No internet connection.' };
   }
-
-  if (typeof isSupabaseConfigured === 'function' && !isSupabaseConfigured()) {
-    return { success: false, error: 'App is not configured. Add Supabase URL and anon key.' };
-  }
-
-  if (!supabaseClient) {
-    return { success: false, error: 'Could not load auth library. Check your connection and refresh.' };
+  if (!isSupabaseConfigured() || !supabaseClient) {
+    return { success: false, error: 'App is not configured. Check Supabase credentials.' };
   }
 
   try {
@@ -22,27 +16,22 @@ async function signIn(email, password) {
       password,
     });
 
-    if (error) {
+    if (error || !data.session) {
       return { success: false, error: 'Login failed. Check your credentials.' };
     }
-
-    if (!data.session) {
-      return { success: false, error: 'Login failed. No session returned.' };
-    }
-
     return { success: true };
-  } catch (err) {
-    if (!navigator.onLine) {
-      return { success: false, error: 'No internet connection.' };
-    }
-    return { success: false, error: 'Something went wrong. Please try again.' };
+  } catch {
+    return {
+      success: false,
+      error: navigator.onLine
+        ? 'Something went wrong. Please try again.'
+        : 'No internet connection.',
+    };
   }
 }
 
 async function signOut() {
-  if (supabaseClient) {
-    await supabaseClient.auth.signOut();
-  }
+  if (supabaseClient) await supabaseClient.auth.signOut();
   window.location.replace('index.html');
 }
 
@@ -60,9 +49,6 @@ async function getCurrentUser() {
   return data.user;
 }
 
-/**
- * Guard for report.html. Optional reason is passed to login page.
- */
 async function requireAuth() {
   const session = await getSession();
   if (!session) {
@@ -74,12 +60,9 @@ async function requireAuth() {
 
 async function redirectIfAuthenticated() {
   const session = await getSession();
-  if (session) {
-    window.location.replace('list.html');
-  }
+  if (session) window.location.replace('list.html');
 }
 
-/** Only redirect on explicit SIGNED_OUT — avoids load/refresh races */
 function watchAuthState(onSignedOut) {
   if (!supabaseClient) return;
   supabaseClient.auth.onAuthStateChange((event) => {
@@ -107,19 +90,17 @@ function initLoginPage() {
   const form = document.getElementById('login-form');
   const errorEl = document.getElementById('login-error');
   const submitBtn = document.getElementById('login-submit');
-
   if (!form) return;
 
   initPasswordToggle();
 
-  // Show session-expired / auth messages from redirect
   const params = new URLSearchParams(window.location.search);
   if (errorEl && params.get('reason') === 'session') {
     errorEl.textContent = 'Session expired. Please login again.';
   }
 
   if (!supabaseClient) {
-    if (errorEl) errorEl.textContent = 'Could not load auth library. Check your connection and refresh.';
+    if (errorEl) errorEl.textContent = 'Could not load auth library. Refresh and try again.';
     if (submitBtn) submitBtn.disabled = true;
     return;
   }
@@ -128,16 +109,15 @@ function initLoginPage() {
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-
     if (errorEl) errorEl.textContent = '';
-
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
 
     submitBtn.disabled = true;
     submitBtn.textContent = 'Signing in...';
 
-    const result = await signIn(email, password);
+    const result = await signIn(
+      document.getElementById('email').value,
+      document.getElementById('password').value
+    );
 
     if (!result.success) {
       if (errorEl) errorEl.textContent = result.error;

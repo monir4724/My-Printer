@@ -1,44 +1,18 @@
 /**
- * My Printer — Report / export layer (PRD schema)
- * Loads application by ?id= from the URL (required).
+ * Report + export — load by ?id=, insert snapshot, then window.print().
  */
 
 let applicationData = null;
-/** Active application id for this page */
 let currentAppId = '';
 
 function getAppIdFromUrl() {
-  const params = new URLSearchParams(window.location.search);
-  const fromQuery = (params.get('id') || '').trim();
+  const fromQuery = (new URLSearchParams(window.location.search).get('id') || '').trim();
   if (fromQuery) return fromQuery;
-
-  // Backup if query was dropped somehow
-  const fromStore = (sessionStorage.getItem('currentAppId') || '').trim();
-  return fromStore;
-}
-
-function statusBadgeClass(status) {
-  const s = (status || '').toLowerCase();
-  if (s.includes('approved')) return 'status-badge--approved';
-  if (s.includes('reject')) return 'status-badge--rejected';
-  return 'status-badge--review';
-}
-
-function formatDate(value) {
-  if (!value) return '—';
-  try {
-    const d = new Date(value + (String(value).length <= 10 ? 'T00:00:00' : ''));
-    if (Number.isNaN(d.getTime())) return value;
-    return d.toLocaleDateString('en-CA');
-  } catch {
-    return value;
-  }
+  return (sessionStorage.getItem('currentAppId') || '').trim();
 }
 
 async function fetchApplication(appId) {
-  if (!navigator.onLine) {
-    throw new Error('No internet connection.');
-  }
+  if (!navigator.onLine) throw new Error('No internet connection.');
 
   const { data, error } = await supabaseClient
     .from(TABLES.APPLICATIONS)
@@ -46,10 +20,7 @@ async function fetchApplication(appId) {
     .eq('id', appId)
     .single();
 
-  if (error) {
-    throw new Error(error.message || 'Could not load application data.');
-  }
-
+  if (error) throw new Error(error.message || 'Could not load application data.');
   return data;
 }
 
@@ -70,31 +41,11 @@ function renderApplication(app) {
   badge.textContent = app.status;
   badge.className = 'status-badge ' + statusBadgeClass(app.status);
 
-  // Browser "Save as PDF" uses <title> as the default filename —
-  // include unique id (+ name) so files do not overwrite each other.
   document.title = buildPdfFileTitle(app);
 
   document.getElementById('report-content').hidden = false;
   document.getElementById('report-loading').hidden = true;
   document.getElementById('report-error').hidden = true;
-}
-
-/**
- * Safe default PDF filename from application id + name.
- * Example: Application-1-Tanvir-Ahmed-My-Printer
- */
-function buildPdfFileTitle(app) {
-  const rawName = (app.applicant_name || 'Applicant').trim();
-  const safeName = rawName
-    .replace(/[\\/:*?"<>|]+/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
-  const safeId = String(app.id || 'unknown')
-    .replace(/[\\/:*?"<>|]+/g, '')
-    .replace(/\s+/g, '-');
-
-  return 'Application-' + safeId + '-' + safeName + '-My-Printer';
 }
 
 function showFetchError(message) {
@@ -113,29 +64,22 @@ function showFetchError(message) {
 function updatePrintFooter(email) {
   const footer = document.getElementById('print-footer');
   if (!footer) return;
-  const when = new Date().toLocaleString();
-  footer.textContent = 'Exported by: ' + (email || 'unknown') + ' on ' + when;
+  footer.textContent =
+    'Exported by: ' + (email || 'unknown') + ' on ' + new Date().toLocaleString();
 }
 
-/**
- * Insert snapshot (PRD fields), then print.
- * Sequential — print only after successful insert.
- */
 async function handleExport() {
   const exportBtn = document.getElementById('export-btn');
   const exportError = document.getElementById('export-error');
+  const defaultLabel = 'Export & Save';
 
   if (exportError) {
     exportError.hidden = true;
     exportError.querySelector('.error-banner-text').textContent = '';
   }
 
-  const defaultLabel = 'Export & Save';
-
   try {
-    if (!navigator.onLine) {
-      throw new Error('No internet connection.');
-    }
+    if (!navigator.onLine) throw new Error('No internet connection.');
 
     exportBtn.disabled = true;
     exportBtn.textContent = 'Saving...';
@@ -153,27 +97,21 @@ async function handleExport() {
       .eq('id', currentAppId)
       .single();
 
-    if (fetchError || !appData) {
-      throw new Error('Failed to load application data.');
-    }
+    if (fetchError || !appData) throw new Error('Failed to load application data.');
 
     applicationData = appData;
 
-    const { error: insertError } = await supabaseClient
-      .from(TABLES.EXPORT_SNAPSHOTS)
-      .insert({
-        exported_by: user.id,
-        exporter_email: user.email,
-        application_id: currentAppId,
-        snapshot_data: appData,
-      });
+    const { error: insertError } = await supabaseClient.from(TABLES.EXPORT_SNAPSHOTS).insert({
+      exported_by: user.id,
+      exporter_email: user.email,
+      application_id: currentAppId,
+      snapshot_data: appData,
+    });
 
-    if (insertError) {
-      throw new Error('Snapshot save failed. Export cancelled.');
-    }
+    if (insertError) throw new Error('Snapshot save failed. Export cancelled.');
 
     updatePrintFooter(user.email);
-    if (appData) document.title = buildPdfFileTitle(appData);
+    document.title = buildPdfFileTitle(appData);
     window.print();
   } catch (err) {
     const message = err.message || 'Export failed. Please try again.';
@@ -183,19 +121,15 @@ async function handleExport() {
       exportError.hidden = false;
     }
   } finally {
-    if (exportBtn && applicationData) {
-      exportBtn.disabled = false;
-      exportBtn.textContent = defaultLabel;
-    } else if (exportBtn && !applicationData) {
-      exportBtn.disabled = true;
-      exportBtn.textContent = defaultLabel;
-    }
+    if (!exportBtn) return;
+    exportBtn.textContent = defaultLabel;
+    exportBtn.disabled = !applicationData;
   }
 }
 
 async function initReportPage() {
   if (!supabaseClient) {
-    showFetchError('Could not load auth library. Check your connection and refresh.');
+    showFetchError('Could not load auth library. Refresh and try again.');
     return;
   }
 
@@ -208,19 +142,13 @@ async function initReportPage() {
     return;
   }
 
-  watchAuthState(() => {
-    window.location.replace('index.html?reason=session');
-  });
+  watchAuthState(() => window.location.replace('index.html?reason=session'));
 
   const logoutBtn = document.getElementById('logout-btn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => signOut());
-  }
+  if (logoutBtn) logoutBtn.addEventListener('click', () => signOut());
 
   const exportBtn = document.getElementById('export-btn');
-  if (exportBtn) {
-    exportBtn.addEventListener('click', () => handleExport());
-  }
+  if (exportBtn) exportBtn.addEventListener('click', () => handleExport());
 
   try {
     applicationData = await fetchApplication(currentAppId);
@@ -230,9 +158,6 @@ async function initReportPage() {
     const user = await getCurrentUser();
     if (user) updatePrintFooter(user.email);
   } catch (err) {
-    showFetchError(
-      err.message ||
-        'Could not load application data for ID: ' + currentAppId
-    );
+    showFetchError(err.message || 'Could not load application data for ID: ' + currentAppId);
   }
 }
